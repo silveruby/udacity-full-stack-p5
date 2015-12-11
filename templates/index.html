@@ -1,0 +1,50 @@
+{% extends "main.html" %}
+{% block content %}
+
+<div class="row">
+	<div class="col-md-12">
+		<!-- Breadcrumb -->
+		<ol class="breadcrumb">
+			<li class="active">Home</li>
+		</ol>	
+
+		<!-- Title -->
+		<div class="title">
+			<h2>Categories</h2>
+			<span class="add">
+				<a href="{{ url_for('newCategory') }}">Add a new category</a>
+			</span>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<!-- Message Flashing --> 			
+		{% with messages = get_flashed_messages() %}
+		{% if messages %}
+		<div class="alert alert-info" role="alert">
+			<ul class="flash">
+			{% for message in messages %}
+			  <li><strong>{{message}}</strong></li>
+			  {% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+		{% endwith %} 
+	</div>
+</div>
+
+<div class="row content">
+	<div class="col-md-3 col-xs-12">
+		<ul class="list-group">
+			{% for category in categories %}
+			<li class="list-group-item">
+				<!-- <span class="badge">14</span> -->
+				<a href="{{ url_for('showCategory', category_id = category.id)}}">{{ category.name }}</a>
+			</li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
+{% endblock %}

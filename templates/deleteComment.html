@@ -1,0 +1,42 @@
+{% extends "main.html" %}
+{% block content %}
+
+<div class="row">
+	<div class="col-md-12">
+
+		<!-- Breadcrumb -->	
+		<ol class="breadcrumb">
+			<li><a href="{{ url_for('showCatalog') }}">Home</a></li>
+			<li><a href="{{ url_for('showCategory', category_id = category.id) }}">
+				{{ category.name }}</a>
+			</li>		
+			<li><a href="{{ url_for('showItem', category_id = category.id, item_id = item.id) }}">
+				{{ item.name }}</a>
+			</li>		
+			<li>Comment</li>					
+			<li class="active">Delete</li>
+		</ol>	
+
+		<!-- Title -->		
+		<div class="title">
+			<h2>Delete comment</h2>
+		</div>
+	</div>
+</div>
+
+<!-- Content -->
+<div class="row content">
+	<div class="col-md-12">
+		<p class="lead">Are you sure you want to delete this comment?</p>
+		<blockquote><p>{{ comment.text }}</p></blockquote>		
+		<form action={{ url_for('deleteComment', category_id = category.id, item_id = item.id, comment_id=comment.id) }} method='POST'>
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+			<div class="form-group">
+				<button class="btn btn-default" type='submit'>Yes, delete comment</button>
+				<a href="{{ url_for('showItem', category_id = category.id, item_id = item.id) }}">Cancel</a>
+			</div>
+		</form>
+	</div>
+</div>
+
+{% endblock %}

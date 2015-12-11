@@ -1,0 +1,39 @@
+{% extends "main.html" %}
+{% block content %}
+
+<div class="row">
+	<div class="col-md-12">
+		<!-- Breadcrumb -->
+		<ol class="breadcrumb">
+			<li><a href="{{ url_for('showCatalog') }}">Home</a></li>
+			<li><a href="{{ url_for('showCategory', category_id = category.id) }}">
+				{{ category.name }}</a>
+			</li>		
+			<li class="active">Edit</li>
+		</ol>		
+
+		<!-- Title -->
+		<div class="title">
+			<h2>Edit category</h2>
+		</div>
+	</div>
+</div>
+
+<!-- Content -->
+<div class="content row">
+	<div class="col-md-3 col-xs-12">
+		<form action={{ url_for('editCategory', category_id = category.id) }} method='POST'>
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+			<div class="form-group">
+				<label for='categoryName'>Category name</label>
+				<input type='text' class='form-control' id='categoryName' name='category' placeholder='Category name' value='{{ category.name }}'></input>
+			</div>
+			<div class="form-group">
+				<button class='btn btn-default' type='submit'>Submit</button>
+				<a href=" {{ url_for('showCategory', category_id = category.id) }} ">Cancel</a>	
+			</div>
+		</form>
+	</div>
+</div>
+
+{% endblock %}

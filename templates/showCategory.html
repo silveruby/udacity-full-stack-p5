@@ -1,0 +1,57 @@
+{% extends "main.html" %}
+{% block content %}
+
+<div class="row">
+	<div class="col-md-12">
+		<!-- Breadcrumb -->
+		<ol class="breadcrumb">
+			<li><a href="{{ url_for('showCatalog') }}">Home</a></li>
+			<li class="active">{{ category.name }}</li>
+		</ol>
+
+		<!-- Title -->
+		<div class="title">
+			<h2>{{ category.name }}</h2>
+			<span class="edit_delete">
+				<a href="{{ url_for('editCategory', category_id = category.id) }}">Edit</a>
+				<a href="{{ url_for('deleteCategory', category_id = category.id) }}">Delete</a>	
+			</span>
+			<span class="add">	
+				<a href="{{ url_for('newItem', category_id = category.id) }}">Add a new item</a>
+			</span>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<!--Message Flashing --> 			
+		{% with messages = get_flashed_messages() %}
+		{% if messages %}
+		<div class="alert alert-info" role="alert">
+			<ul class="flash">
+			{% for message in messages %}
+			  <li><strong>{{message}}</strong></li>
+			  {% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+		{% endwith %} 
+	</div>
+</div>
+
+<div class="row content">
+	<div class="col-md-3 col-xs-12">
+		<ul class="list-group">
+			{% for item in items %}
+			<li class="list-group-item">
+				<a href="{{ url_for('showItem', category_id = category.id, item_id = item.id)}}">
+					{{ item.name }}
+				</a>
+			</li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
+
+{% endblock %}

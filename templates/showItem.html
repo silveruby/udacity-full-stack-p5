@@ -1,0 +1,91 @@
+{% extends "main.html" %}
+{% block content %}
+
+<div class="row">
+	<div class="col-md-12">
+		<!-- Breadcrumb -->
+		<ol class="breadcrumb">
+			<li><a href="{{ url_for('showCatalog') }}">Home</a></li>
+			<li><a href="{{ url_for('showCategory', category_id = category.id) }}">
+				{{ category.name }}</a>
+			</li>		
+			<li class="active">{{ item.name }}</li>
+		</ol>
+
+		<!-- Title -->
+		<div class="title">
+			<h2>{{ item.name }}</h2>
+			<span class="edit_delete">
+				<a href="{{ url_for('editItem', category_id = category.id, item_id = item.id) }}">Edit</a>
+				<a href="{{ url_for('deleteItem', category_id = category.id, item_id = item.id) }}">Delete</a>
+			</span>	
+		</div>
+
+		<!-- Message Flashing --> 			
+		{% with messages = get_flashed_messages() %}
+		{% if messages %}
+		<div class="alert alert-info" role="alert">
+			<ul class="flash">
+			{% for message in messages %}
+			  <li><strong>{{message}}</strong></li>
+			  {% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+		{% endwith %} 
+	</div>
+</div>
+
+<div class="row content">
+	<div class="col-md-3 col-xs-12">
+		<div class="thumbnail">
+			<img src="{{ url_for('uploaded_file', filename=item.image) }}" alt="{{ item.name }}">
+		</div>		
+	</div>
+
+	<div class="col-md-8 col-md-offset-1 col-xs-12">
+		<div class="item_group"> 
+			<p><strong>Description:</strong></p>
+			<p>{{ item.description }}</p>
+		</div>
+
+		<div class="item_group">
+			<p><strong>Notes:</strong></p>
+			<p>{{ item.notes }}</p>
+		</div>
+
+		<!-- Comment -->
+		<div class="item_group">
+			<p><strong>Comments:</strong></p>
+			{% for comment in comments %}
+			<div class="comment">
+				<blockquote>
+					{{ comment.text }}
+				</blockquote> 
+				<p><small>
+					- posted by {{ comment.username }} on {{ comment.date }}
+					<span class="comment_edit_delete">
+						<a href="{{ url_for('editComment', category_id=category.id, item_id = item.id, comment_id = comment.id) }}">Edit</a>
+						<a href="{{ url_for('deleteComment', category_id = category.id, item_id = item.id, comment_id = comment.id) }}">Delete</a>
+					</span>
+				</small></p>
+			</div>
+			{% endfor %}
+
+			<form action={{ url_for('showItem', category_id = category.id, item_id = item.id) }} method='POST'>
+				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+				<div class="well">
+					<div class="form-group">
+						<label for='comment'>New comment</label>
+						<textarea class='form-control' id='comment' name='comment' placeholder='Comment'></textarea>	
+					</div>
+					<div class="form-group">	
+						<button class='btn btn-default' type='submit'>Add comment</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

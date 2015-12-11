@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap-3.3.5/css/bootstrap.min.css') }}"></link>
+      <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/main.css') }}"></link>
+      <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.11.3.min.js') }}"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">
+          <img alt="Brand" src="{{ url_for('static', filename='images/costa_rica-flag.png') }}">
+          <span class="hidden-xs">Ruby's Costa Rica Guide</span>
+          <span class="visible-xs-inline">Ruby's CR Guide</span>
+        </a>
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle Navigation Menu</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        </div>
+
+        <div class="collapse navbar-collapse">
+          <div class="navbar-right">
+            {% if login_session.email %}
+              <span>Logged in as {{ login_session.username }} |
+              <a href="{{ url_for('fbdisconnect') }}">Logout</a></span>
+            {% else %}
+              <span><a href="{{ url_for('showLogin') }}">Login</a></span>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </nav>  
+
+    <div class="container">
+      <!-- MAIN CONTENT -->
+      <div class="row">
+        <div class="col-md-12">
+          <!-- Breadcrumb -->
+          <ol class="breadcrumb">
+            <li><a href="{{ url_for('showCatalog') }}">Home</a></li>
+            <li class="active">Login</li>
+          </ol> 
+
+          <!-- Title -->
+          <div class="title">
+            <h2>Login</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="row content">
+        <div class="col-md-12">
+          <div class="alert alert-info">
+            <p>To create, edit and delete categories and items, you must be login as an authorized user.</p>
+            <p>Otherwise, you can login to create new comment on item details or modify/delete your existing comments.</p>
+          </div>
+          <!-- FACEBOOK SIGN IN-->
+          <div id="login">
+            <div>
+              <fb:login-button scope="public_profile,email" onlogin="sendTokenToServer();">
+              <a href='javascript:sendTokenToServer()'>Login with Facebook</a>
+              </fb:login-button>
+            </div>
+          </div>
+          <!--END FACEBOOK SIGN IN -->
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted">
+          Copyrighted 2015
+        </p>
+
+        <p class="text-muted">
+          Ruby Zheng<br />
+          Udacity Fullstack Nanodegree Project 3
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<script>
+function signInCallback(authResult) {
+  if (authResult['code']) {
+    // Hide the sign-in button now that the user is authorized
+    $('#signinButton').attr('style', 'display: none');
+    // Send the one-time-use code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main restaurants page
+    $.ajax({
+      type: 'POST',
+      url: '/gconnect?state={{STATE}}',
+      processData: false,
+      data: authResult['code'],
+      contentType: 'application/octet-stream; charset=utf-8',
+      success: function(result) {
+        // Handle or verify the server response if necessary.
+        if (result) {
+          $('#result').html('Login Successful!</br>'+ result + '</br>Redirecting...')
+         setTimeout(function() {
+          window.location.href = "/restaurant";
+         }, 4000);
+          
+      } else if (authResult['error']) {
+    console.log('There was an error: ' + authResult['error']);
+  } else {
+        $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+         }
+      }
+      
+  }); } }
+</script>
+<!--END GOOGLE PLUS SIGN IN -->
+
+<!--FACEBOOK SIGN IN -->
+<script>
+  window.fbAsyncInit = function() {
+  FB.init({
+    appId      : '1641401019447563',
+    cookie     : true,  // enable cookies to allow the server to access 
+                        // the session
+    xfbml      : true,  // parse social plugins on this page
+    version    : 'v2.4' // use version 2.4
+  });
+  };
+  // Load the SDK asynchronously
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+  // Here we run a very simple test of the Graph API after login is
+  // successful.  See statusChangeCallback() for when this call is made.
+  function sendTokenToServer() {
+    var access_token = FB.getAuthResponse()['accessToken'];
+    console.log(access_token)
+    console.log('Welcome!  Fetching your information.... ');
+    FB.api('/me', function(response) {
+      console.log('Successful login for: ' + response.name);
+     $.ajax({
+      type: 'POST',
+      url: '/fbconnect?state={{STATE}}',
+      processData: false,
+      data: access_token,
+      contentType: 'application/octet-stream; charset=utf-8',
+      success: function(result) {
+        // Handle or verify the server response if necessary.
+        if (result) {
+          $('#login').html('Login Successful!</br>'+ result + '</br>Redirecting...')
+         setTimeout(function() {
+          window.location.href = "/";
+         }, 4000);
+          
+      } else {
+        $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+         }
+      }
+      
+  });
+    });
+  }
+</script>

@@ -1,0 +1,37 @@
+{% extends "main.html" %}
+{% block content %}
+
+<div class="row">
+	<div class="col-md-12">
+
+		<!-- Breadcrumb -->	
+		<ol class="breadcrumb">
+			<li><a href="{{ url_for('showCatalog') }}">Home</a></li>
+			<li><a href="{{ url_for('showCategory', category_id = category.id) }}">
+				{{ category.name }}</a>
+			</li>		
+			<li class="active">Delete</li>
+		</ol>
+
+		<!-- Title -->		
+		<div class="title">
+			<h2>Delete category</h2>
+		</div>
+	</div>
+</div>
+
+<!-- Content -->
+<div class="row content">
+	<div class="col-md-12">
+		<p class="lead">Are you sure you want to delete {{ category.name }} category and all its items?</p>
+		<form action={{ url_for('deleteCategory', category_id = category.id) }} method='POST'>
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+			<div class="form-group">
+				<button class="btn btn-default" type='submit'>Yes, delete {{ category.name }} category</button>
+				<a href="{{ url_for('showCategory', category_id = category.id) }}">Cancel</a>
+			</div>
+		</form>
+	</div>
+</div>
+
+{% endblock %}

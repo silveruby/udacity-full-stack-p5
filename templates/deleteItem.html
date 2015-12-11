@@ -1,0 +1,44 @@
+{% extends "main.html" %}
+{% block content %}
+
+<div class="row">
+	<div class="col-md-12">
+
+		<!-- Breadcrumb -->	
+		<ol class="breadcrumb">
+			<li><a href="{{ url_for('showCatalog') }}">Home</a></li>
+			<li><a href="{{ url_for('showCategory', category_id = category.id) }}">
+				{{ category.name }}</a>
+			</li>		
+			<li><a href="{{ url_for('showItem', category_id = category.id, item_id = item.id) }}">
+				{{ item.name }}</a>
+			</li>				
+			<li class="active">Delete</li>
+		</ol>	
+
+		<!-- Title -->		
+		<div class="title">
+			<h2>Delete item</h2>
+		</div>
+	</div>
+</div>
+
+<div class="row content">
+	<div class="col-md-3 col-xs-12">
+		<div class="thumbnail">
+			<img src="{{ url_for('uploaded_file', filename=item.image) }}" alt="{{ item.name }}">
+		</div>		
+	</div>	
+	<div class="col-md-12">
+		<p class="lead">Are you sure you want to delete {{ item.name }} item?</p>
+		<form action={{ url_for('deleteItem', category_id = category.id, item_id = item.id) }} method='POST'>
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+			<div class="form-group">
+				<button class="btn btn-default" type='submit'>Yes, delete {{ item.name }} item</button>
+				<a href="{{ url_for('showCategory', category_id = category.id) }}">Cancel</a>
+			</div>
+		</form>
+	</div>
+</div>
+
+{% endblock %}
