@@ -31,7 +31,7 @@ Description: Deploy webapp for the Udacity training course.
 		$ sudo apt-get update
 		$ sudo apt-get upgrade
 
-2. Add user grader (Source: [digitalocean][adduser], [askubuntu][visudo], [udacity][login])
+2. Add user grader (Source: [digitalocean][adduser], [askubuntu visudo][visudo], [askubuntu root login][rootlogin], [udacity][login])
 	
 	2.1 Add user
 	
@@ -42,17 +42,25 @@ Description: Deploy webapp for the Udacity training course.
 		
 		grader ALL=(ALL:ALL) NOPASSWD:ALL	
 		
-	2.3 Copy public key from root to grader
+	2.2 Copy public key from root to grader
 	
 		$ cd /home/grader
 		$ sudo mkdir .ssh
 		$ cd .ssh
 		$ sudo mv /root/.ssh/authorized_keys .
 		$ sudo chmod 755 authorized_keys
+		
+	2.3 Disable root login
+	
+		$ sudo vi /etc/ssh/sshd_config
+		
+		Update PermitRootLogin to 'no'
+		
 	
 [adduser]: https://www.digitalocean.com/community/tutorials/how-to-add-and-delete-users-on-an-ubuntu-14-04-vps
 [visudo]: http://askubuntu.com/questions/334318/sudoers-file-enable-nopasswd-for-user-all-commands
 [login]: https://discussions.udacity.com/t/grader-login-not-working/29469/9
+[rootlogin]: http://askubuntu.com/questions/449364/what-does-without-password-mean-in-sshd-config-file/449372#449372
 
 3. Change SSH port from 22 to 2200 (Source: [linuxlookup][sshport])
 
@@ -112,7 +120,7 @@ Description: Deploy webapp for the Udacity training course.
 [configlinux]: https://www.udacity.com/course/viewer#!/c-ud299-nd/l-4340119836/m-4818948614
 [servername]: http://askubuntu.com/questions/256013/could-not-reliably-determine-the-servers-fully-qualified-domain-name
 
-7. Deploy simple Flask app (Source: [digitalocean][flaskapp])
+7. Deploy simple Flask app (Source: [digitalocean][flaskapp], [python-guide][virtualenv])
 
 	7.1 Enable WSGI 
 	
@@ -138,7 +146,7 @@ Description: Deploy webapp for the Udacity training course.
 		if __name__ == "__main__":
 		    app.run()
 		    
-	7.3 Setup virtual environment & install Flask
+	7.3 Setup virtual environment
 	
 		$ pwd
 		
@@ -149,10 +157,11 @@ Description: Deploy webapp for the Udacity training course.
 		$ sudo virtualenv venv
 		$ sudo chmod -R 777 venv
 		$ source venv/bin/activate 
-		$ sudo pip install Flask
+
 		
-	7.4 Test run Flask app
+	7.4 Install & test run Flask app
 	
+		$ sudo pip install Flask
 		$ sudo python __init__.py 
 		
 		Install is successful if we see “Running on http://localhost:5000/” 
@@ -212,6 +221,7 @@ Description: Deploy webapp for the Udacity training course.
 	
 
 [flaskapp]:https://www.digitalocean.com/community/tutorials/how-to-deploy-a-flask-application-on-an-ubuntu-vps
+[virtualenv]: http://docs.python-guide.org/en/latest/dev/virtualenvs/
 
 8. Install Git (Soure: [digialocean][installgit])
 		
@@ -228,16 +238,11 @@ Description: Deploy webapp for the Udacity training course.
 		$ sudo git clone https://github.com/silveruby/udacity-full-stack-p3.git
 		$ sudo mv catalog catalog_old
 		$ sudo mv udacity-full-stack-p3 catalog
+		$ sudo mv catalog_old/venv 	catalog/venv
 		
 10. Install packages required to run the project (Source: [flask-seasurf][seasurf], [oauth2client][oauth2client], [stueken][stueken])
 
-		First, activate new virtual environment for catalog for for installs
-		$ sudo virtualenv venv 
-		$ sudo chmod -R 777 venv
 		$ source venv/bin/activate
-		
-		Re-install Flask 
-		$ sudo pip install Flask
 		
 		Install project dependencies
 		$ sudo pip install httplib2
@@ -246,6 +251,8 @@ Description: Deploy webapp for the Udacity training course.
 		$ sudo pip install --upgrade oauth2client
 		$ sudo pip install sqlalchemy
 		$ sudo apt-get install python-psycopg2
+		
+		$ deactivate
 		
 [seasurf]:https://flask-seasurf.readthedocs.org/en/latest/
 [oauth2client]:https://github.com/google/oauth2client
@@ -308,4 +315,63 @@ Description: Deploy webapp for the Udacity training course.
 16. Add IP address to Facebook Valid OAuth redirect URIs
 		
 		IP address: http://52.34.126.189
+
+17. Use fail2ban to protect SSH (Source: [digitalocean][fail2ban])
+
+	17.1 Install fail2ban
+	
+		$ sudo apt-get install fail2ban
+		$ sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+		$ sudo apt-get install nginx sendmail iptables-persistent
+		
+	17.2 Setup firewall
+	
+		Check current Firewall status
+		$ sudo iptables -S
+		
+		Setup base Firewall		
+		$ sudo iptables -A INPUT -i lo -j ACCEPT
+		$ sudo iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+		$ sudo iptables -A INPUT -p tcp --dport 2200 -j ACCEPT
+		$ sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+		$ sudo iptables -A INPUT -p udp --dport 123 -j ACCEPT
+		$ sudo iptables -A INPUT -j DROP
+	
+	17.3 Configure fail2ban
+	
+		$ sudo vi /etc/fail2ban/jail.local
+		
+		Adjust bantime
+		bantime = 1800
+		
+		Update destination email
+		desteemail = zhengsan@gmail.com
+		
+		Update [nginx-http-auth]
+		enable = true
+		
+		Update SSH port to 220
+		ssh = 2200
+	
+	17.4 Restart fail2ban service
+	
+		$ sudo service fail2ban stop
+		$ sudo service fail2ban start
+	
+[fail2ban]:https://www.digitalocean.com/community/tutorials/how-to-protect-ssh-with-fail2ban-on-ubuntu-14-04
+
+18. Create requirements.txt
+
+		$ sudo sh -c 'sudo pip freeze > requirements.txt'
+		
+19. Get rid of warning message (Source: [stueken][unabletoresolve])
+
+		$ vi /etc/hostname
+		
+		Copy hostname (i.e. ip-10-20-48-167)
+		
+		$ sudo vi /etc/hosts
+		
+		Paste hostname to first line (i.e. 127.0.0.1 ip-10-20-48-167)
+
 
